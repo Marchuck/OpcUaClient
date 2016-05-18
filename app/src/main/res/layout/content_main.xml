@@ -38,6 +38,7 @@
     </android.support.design.widget.TextInputLayout>
 
     <ProgressBar
+        android:progressDrawable="@color/colorPrimaryDark"
         android:id="@+id/progressBar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

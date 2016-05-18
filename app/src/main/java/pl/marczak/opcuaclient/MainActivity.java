@@ -119,7 +119,8 @@ public class MainActivity extends AppCompatActivity implements UiConnector {
                 status.setText(dt);
                 fab1.setVisibility(View.VISIBLE);
                 fab3.setVisibility(View.VISIBLE);
-
+                if (rx.isConnected()) fab.setText("disconnect");
+                else fab.setText("connect");
             }
         });
     }
@@ -130,16 +131,10 @@ public class MainActivity extends AppCompatActivity implements UiConnector {
             @Override
             public void run() {
                 status.setAlpha(0f);
-                status.setText("Connected");
-                status.animate().alpha(1f).setDuration(300).start();
+                status.setText("Connected"); fab.setText("disconnect");
                 fab1.setVisibility(View.VISIBLE);
                 fab3.setVisibility(View.VISIBLE);
 
-                fab1.setAlpha(0f);
-                fab3.setAlpha(0f);
-
-                fab1.animate().alpha(1f).setDuration(300).start();
-                fab3.animate().alpha(1f).setDuration(300).start();
             }
         });
     }
