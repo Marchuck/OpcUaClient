@@ -3,13 +3,16 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 23
     buildToolsVersion "23.0.3"
-
+    dexOptions {
+        javaMaxHeapSize "4g" //specify the heap size for the dex process
+    }
     defaultConfig {
         applicationId "pl.marczak.opcuaclient"
         minSdkVersion 15
         targetSdkVersion 23
         versionCode 1
         versionName "1.0"
+        multiDexEnabled true
     }
     buildTypes {
         release {
@@ -18,27 +21,24 @@ android {
         }
     }
     packagingOptions {
-        exclude 'META-INF/DEPENDENCIES.txt'
-        exclude 'META-INF/LICENSE.txt'
-        exclude 'META-INF/NOTICE.txt'
-        exclude 'META-INF/NOTICE'
         exclude 'META-INF/LICENSE'
-        exclude 'META-INF/DEPENDENCIES'
-        exclude 'META-INF/notice.txt'
-        exclude 'META-INF/license.txt'
-        exclude 'META-INF/dependencies.txt'
-        exclude 'META-INF/LGPL2.1'
+        exclude 'META-INF/NOTICE'
     }
 }
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
-    compile 'com.android.support:appcompat-v7:23.2.1'
-    compile 'com.android.support:design:23.2.1'
+    compile 'com.android.support:appcompat-v7:23.0.3'
+    compile 'com.android.support:design:23.2.0'
     compile 'io.reactivex:rxandroid:1.1.0'
-    compile 'com.squareup.retrofit2:retrofit:2.0.2'
-    compile 'com.squareup.okhttp3:okhttp:3.2.0'
+    compile 'com.android.support:multidex:1.0.0'
+    //compile 'io.reactivex:rxjava:1.1.0'
     compile files('libs/Prosys-OPC-UA-Java-SDK-Client-Server-Evaluation-2.2.0-552.jar')
     compile files('libs/bcprov-jdk15on-152.jar')
+    compile files('libs/commons-logging-1.1.1.jar')
+    compile files('libs/log4j-1.2.17.jar')
+    compile files('libs/Opc.Ua.Stack-1.02.337.4.jar')
+    compile files('libs/slf4j-api-1.7.7.jar')
+    compile files('libs/slf4j-log4j12-1.7.7.jar')
 }

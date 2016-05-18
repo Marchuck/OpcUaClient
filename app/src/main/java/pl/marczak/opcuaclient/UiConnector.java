@@ -9,6 +9,8 @@ import org.opcfoundation.ua.builtintypes.DateTime;
 public interface UiConnector {
     void showError(Exception ex);
 
+    void onConnected();
+
     void showResult(DateTime dt);
 }
 
