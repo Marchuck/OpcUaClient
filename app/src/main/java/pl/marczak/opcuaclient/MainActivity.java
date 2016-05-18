@@ -12,16 +12,17 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import org.opcfoundation.ua.builtintypes.DateTime;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements UiConnector {
 
     public static final String TAG = MainActivity.class.getSimpleName();
     public static final String name = MainActivity.class.getPackage().getName();
-    FloatingActionButton fab, fab1, fab3;
+    Button fab, fab1, fab3;
     ProgressBar progressBar;
     TextInputLayout serverLayout;
     TextInputEditText serverEdittext;
@@ -33,8 +34,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         injectViews();
-        prepareFab(Color.BLACK, fab3);
-        prepareFab(Color.BLUE, fab1);
+//        prepareFab(Color.BLACK, fab3);
+//        prepareFab(Color.BLUE, fab1);
         fab.setOnClickListener(getUaListener());
         fab1.setOnClickListener(new ReadListener(rx));
         fab3.setOnClickListener(new WriteListener(rx));
@@ -59,9 +60,9 @@ public class MainActivity extends AppCompatActivity {
 //            progressBar.getProgressDrawable().setColorFilter(colorAccent, android.graphics.PorterDuff.Mode.SRC_IN);
 
         status = (TextView) findViewById(R.id.status);
-        fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab1 = (FloatingActionButton) findViewById(R.id.fab1);
-        fab3 = (FloatingActionButton) findViewById(R.id.fab3);
+        fab = (Button) findViewById(R.id.fab);
+        fab1 = (Button) findViewById(R.id.fab1);
+        fab3 = (Button) findViewById(R.id.fab3);
 
         fab1.setVisibility(View.GONE);
         fab3.setVisibility(View.GONE);
@@ -70,37 +71,7 @@ public class MainActivity extends AppCompatActivity {
         serverEdittext = (TextInputEditText) findViewById(R.id.input_server_name);
         if (serverEdittext == null) throw new NullPointerException("Nullable view");
         serverEdittext.setText("opc.tcp://192.168.0.15:9099/Matlab");
-        rx = new Rx(new UiConnector() {
-            @Override
-            public void showError(Exception ex) {
-                MainActivity.this.showError(ex);
-            }
-
-            @Override
-            public void onConnected() {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        status.setAlpha(0f);
-                        status.setText("Connected");
-                        status.animate().alpha(1f).setDuration(300).start();
-                        fab1.setVisibility(View.VISIBLE);
-                        fab3.setVisibility(View.VISIBLE);
-
-                        fab1.setAlpha(0f);
-                        fab3.setAlpha(0f);
-
-                        fab1.animate().alpha(1f).setDuration(300).start();
-                        fab3.animate().alpha(1f).setDuration(300).start();
-                    }
-                });
-            }
-
-            @Override
-            public void showResult(DateTime dt) {
-                MainActivity.this.showResult(dt);
-            }
-        });
+        rx = new Rx(this);
     }
 
     private View.OnClickListener getUaListener() {
@@ -110,7 +81,9 @@ public class MainActivity extends AppCompatActivity {
                 Snackbar.make(view, "Connecting to server...", Snackbar.LENGTH_LONG).show();
                 showProgressBar();
                 final String server = serverEdittext.getText().toString();
-                rx.connect(server);
+                if (!rx.isConnected())
+                    rx.connect(server);
+                else rx.disconnect();
             }
         };
     }
@@ -123,6 +96,7 @@ public class MainActivity extends AppCompatActivity {
         progressBar.setVisibility(View.VISIBLE);
     }
 
+    @Override
     public void showError(final Exception ex) {
         Log.e(TAG, "showError: " + ex.getMessage());
         runOnUiThread(new Runnable() {
@@ -135,16 +109,37 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    public void showResult(final DateTime dt) {
+    @Override
+    public void showResult(final String dt) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 hideProgressBar();
                 status.setTextColor(Color.BLUE);
-                status.setText("Connected " + dt);
+                status.setText(dt);
                 fab1.setVisibility(View.VISIBLE);
                 fab3.setVisibility(View.VISIBLE);
 
+            }
+        });
+    }
+
+    @Override
+    public void onConnected() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                status.setAlpha(0f);
+                status.setText("Connected");
+                status.animate().alpha(1f).setDuration(300).start();
+                fab1.setVisibility(View.VISIBLE);
+                fab3.setVisibility(View.VISIBLE);
+
+                fab1.setAlpha(0f);
+                fab3.setAlpha(0f);
+
+                fab1.animate().alpha(1f).setDuration(300).start();
+                fab3.animate().alpha(1f).setDuration(300).start();
             }
         });
     }

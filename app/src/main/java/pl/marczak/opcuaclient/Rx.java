@@ -40,6 +40,7 @@ import java.util.concurrent.TimeUnit;
 import rx.Observable;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
@@ -176,7 +177,7 @@ public class Rx {
                     return;
                 }
                 subscriber.onNext(true);
-                connector.showResult(time);
+                connector.showResult("Connected\n" + time.toString());
                 subscriber.onCompleted();
             }
         });
@@ -186,7 +187,6 @@ public class Rx {
         return Observable.create(new Observable.OnSubscribe<Boolean>() {
             @Override
             public void call(Subscriber<? super Boolean> subscriber) {
-
 
                 NodeId node = uaClient.getSession().getSessionId();
                 try {
@@ -260,6 +260,36 @@ public class Rx {
                     return;
                 }
                 subscriber.onNext(response);
+                subscriber.onCompleted();
+            }
+        });
+    }
+
+    public boolean isConnected() {
+        return uaClient != null && uaClient.isConnected();
+    }
+
+    public void disconnect() {
+        disconnectFromServer().subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<Boolean>() {
+                    @Override
+                    public void call(Boolean aBoolean) {
+                        connector.showResult("Disconnected from server");
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+
+                    }
+                });
+    }
+
+    private rx.Observable<Boolean> disconnectFromServer() {
+        return Observable.create(new Observable.OnSubscribe<Boolean>() {
+            @Override
+            public void call(Subscriber<? super Boolean> subscriber) {
+                uaClient.disconnect();
+                subscriber.onNext(true);
                 subscriber.onCompleted();
             }
         });
