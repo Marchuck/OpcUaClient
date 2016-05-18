@@ -71,12 +71,22 @@ public class MainActivity extends AppCompatActivity implements UiConnector {
 
     @Override
     public void hideProgressBar() {
-        progressBar.setVisibility(View.GONE);
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                progressBar.setVisibility(View.GONE);
+            }
+        });
     }
 
     @Override
     public void showProgressBar() {
-        progressBar.setVisibility(View.VISIBLE);
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                progressBar.setVisibility(View.VISIBLE);
+            }
+        });
     }
 
     @Override
