@@ -24,31 +24,38 @@
     <include layout="@layout/content_main" />
 
     <Button
-        android:text="connect"
         android:id="@+id/fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|center"
+
+        android:layout_margin="5sp"
         android:layout_marginBottom="0sp"
         android:background="@color/colorAccent"
+        android:padding="5sp"
+        android:text="connect"
         android:textColor="@android:color/white" />
 
     <Button
-        android:text="read"
         android:id="@+id/fab1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|left"
+        android:layout_margin="5sp"
         android:background="@color/colorAccent"
+        android:padding="5sp"
+        android:text="read"
         android:textColor="@android:color/white" />
 
     <Button
-        android:text="write"
         android:id="@+id/fab3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|right"
+        android:layout_margin="5sp"
         android:background="@color/colorAccent"
+        android:padding="5sp"
+        android:text="search nodes"
         android:textColor="@android:color/white" />
 
 </android.support.design.widget.CoordinatorLayout>

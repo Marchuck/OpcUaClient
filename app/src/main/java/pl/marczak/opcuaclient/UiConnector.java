@@ -8,7 +8,12 @@ public interface UiConnector {
     void showError(Exception ex);
 
     void onConnected();
+
     void onDisconnected();
+
+    void hideProgressBar();
+
+    void showProgressBar();
 
     void showResult(String message);
 }

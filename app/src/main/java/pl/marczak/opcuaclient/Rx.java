@@ -6,9 +6,7 @@ import com.prosysopc.ua.ApplicationIdentity;
 import com.prosysopc.ua.PkiFileBasedCertificateValidator;
 import com.prosysopc.ua.ServiceException;
 import com.prosysopc.ua.SessionActivationException;
-import com.prosysopc.ua.StatusException;
 import com.prosysopc.ua.UserIdentity;
-import com.prosysopc.ua.client.AddressSpaceException;
 import com.prosysopc.ua.client.UaClient;
 import com.prosysopc.ua.nodes.UaMethod;
 
@@ -29,8 +27,6 @@ import org.opcfoundation.ua.core.ReadResponse;
 import org.opcfoundation.ua.core.ReadValueId;
 import org.opcfoundation.ua.core.ReferenceDescription;
 import org.opcfoundation.ua.core.TimestampsToReturn;
-import org.opcfoundation.ua.core.WriteResponse;
-import org.opcfoundation.ua.core.WriteValue;
 import org.opcfoundation.ua.transport.security.SecurityMode;
 
 import java.net.URISyntaxException;
@@ -125,13 +121,10 @@ public class Rx {
                 identity.setApplicationDescription(appDescription);
                 identity.setOrganisation("Prosys");
                 uaClient.setApplicationIdentity(identity);
-
                 // Set locale
                 uaClient.setLocale(Locale.ENGLISH);
-
                 // Set default timeout to 60 seconds
                 uaClient.setTimeout(60000);
-
                 // Set security mode to NONE (others not currently supported on Android)
                 uaClient.setSecurityMode(SecurityMode.NONE);
 
@@ -147,6 +140,7 @@ public class Rx {
 
                 try {
                     uaClient.connect();
+                    connector.showResult("Connected to " + uaClient.getServerName());
                     Log.w(TAG, "connected to " + uaClient.getServerName());
                     Log.w(TAG, "time elapsed: " + (System.currentTimeMillis() - time0) + " ms");
                     Log.w(TAG, "session name: " + uaClient.getSessionName());
@@ -190,10 +184,6 @@ public class Rx {
         });
     }
 
-    public NodeId getVariableTypesNodeId() {
-        return Identifiers.VariableTypesFolder;
-    }
-
     static NodeId init(int var0) {
         return new NodeId(0, UnsignedInteger.getFromBits(var0));
     }
@@ -203,47 +193,53 @@ public class Rx {
         return Observable.create(new Observable.OnSubscribe<Boolean>() {
             @Override
             public void call(Subscriber<? super Boolean> subscriber) {
-                // StringBuilder sb = new StringBuilder();
-                // NodeId node = Identifiers.ObjectsFolder;
-//                NodeId node = getVariableTypesNodeId();
-                long timezero = System.currentTimeMillis();
-                NodeId[] nodes = new NodeId[12000];
-                for (int j = 0; j < 12000; j++) {
-                    nodes[j] = init(j);
-                }
-                try {
-                    for (NodeId node : nodes) {
-                        try {
-                            DataValue dataValue = uaClient.readValue(node);
-                            Log.e(TAG, "next node: value: " + node.getValue() + ",toString: " + node.toString());
-                            Log.e(TAG, "data value: " + dataValue.getValue().toString());
-                            List<ReferenceDescription> refdesc = uaClient.getAddressSpace().browseMethods(node);
-                            if (refdesc.isEmpty()) Log.e(TAG, "empty refdesc list");
-                            for (ReferenceDescription desc : refdesc) {
-                                Log.e(TAG, "reference description: " + desc.getDisplayName().getText());
-                            }
-                            List<UaMethod> methods = uaClient.getAddressSpace().getMethods(node);
-                            if (methods.isEmpty()) Log.e(TAG, "empty methods list");
-                            for (UaMethod m : methods) {
-                                Log.e(TAG, "method: " + m.getDisplayName().getText());
-                                for (Argument arg : m.getInputArguments()) {
-                                    Log.e(TAG, "arg in: " + arg.getName());
-                                }
-                                for (Argument arg : m.getOutputArguments()) {
-                                    Log.e(TAG, "arg out: " + arg.getName());
-                                }
-                            }
-                        } catch (Exception x) {
-                           // Log.e(TAG, "oops! node error: " + x.getMessage());
-                            //x.printStackTrace();
-                        }
 
-                    }
-                    Log.d(TAG, "checking nodes completed in: " + (System.currentTimeMillis() - timezero) + " ms");
-                } catch (Exception x) {
-                    Log.e(TAG, "exception:" + x.getMessage());
-                    x.printStackTrace();
+                StringBuilder stringBuilder = new StringBuilder();
+                long timezero = System.currentTimeMillis();
+                int k = 0;
+                connector.showProgressBar();
+                NodeId[] nodes = new NodeId[12000];
+                for (int hk = 0; hk < 12000; hk++) {
+                    nodes[hk] = init(hk);
                 }
+                for (int j = 0; j < 12000; j++) {
+                    Log.w(TAG, "current index" + j);
+                    NodeId node = nodes[j];
+                    try {
+                        DataValue dataValue = uaClient.readValue(node);
+                        String displayableValue = dataValue.getValue().toString();
+                        Log.e(TAG, "next value for node " + j + " : " + displayableValue);
+                        stringBuilder.append("nodeId[");
+                        stringBuilder.append(j);
+                        stringBuilder.append("] = ");
+                        stringBuilder.append(displayableValue).append('\n');
+                        List<ReferenceDescription> refdesc = uaClient.getAddressSpace().browseMethods(node);
+                        List<UaMethod> methods = uaClient.getAddressSpace().getMethods(node);
+                        for (ReferenceDescription desc : refdesc) {
+                            Log.e(TAG, "reference description: " + desc.getDisplayName().getText());
+                        }
+                        for (UaMethod m : methods) {
+                            Log.e(TAG, "method: " + m.getDisplayName().getText());
+                            for (Argument arg : m.getInputArguments()) {
+                                Log.e(TAG, "arg in: " + arg.getName());
+                            }
+                            for (Argument arg : m.getOutputArguments()) {
+                                Log.e(TAG, "arg out: " + arg.getName());
+                            }
+                        }
+                    } catch (Exception x) {
+                        // Log.e(TAG, "oops! node error: " + x.getMessage());
+                        //x.printStackTrace();
+                    }
+                    if (j % 120 == 0) {
+                        ++k;
+                        connector.showResult("progress = " + String.valueOf(k) + " %");
+                        Log.w(TAG, "now is: " + k + " %");
+                    }
+                }
+                Log.d(TAG, "checking nodes completed in: " + (System.currentTimeMillis() - timezero) + " ms");
+                connector.hideProgressBar();
+                connector.showResult(stringBuilder.toString());
                 subscriber.onNext(false);
                 subscriber.onCompleted();
             }

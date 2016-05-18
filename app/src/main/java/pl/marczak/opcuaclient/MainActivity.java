@@ -53,29 +53,29 @@ public class MainActivity extends AppCompatActivity implements UiConnector {
         serverEdittext.setText("opc.tcp://192.168.0.15:9099/Matlab");
     }
 
-    private View.OnClickListener getUaListener() {
+    View.OnClickListener getUaListener() {
         return new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 showProgressBar();
                 final String server = serverEdittext.getText().toString();
-                if (!rx.isConnected()){
+                if (!rx.isConnected()) {
                     Snackbar.make(view, "Connecting to server...", Snackbar.LENGTH_LONG).show();
                     rx.connect(server);
-
-                }
-                else{
+                } else {
                     rx.disconnect();
                 }
             }
         };
     }
 
-    private void hideProgressBar() {
+    @Override
+    public void hideProgressBar() {
         progressBar.setVisibility(View.GONE);
     }
 
-    private void showProgressBar() {
+    @Override
+    public void showProgressBar() {
         progressBar.setVisibility(View.VISIBLE);
     }
 
