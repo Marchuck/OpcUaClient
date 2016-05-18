@@ -29,11 +29,17 @@ public class ReadListener implements View.OnClickListener {
         if (rx != null) rx.read().map(new Func1<ReadResponse, String>() {
             @Override
             public String call(ReadResponse readResponse) {
-                Log.d(TAG, "xmlEncodeId: " + readResponse.getXmlEncodeId().toString());
-                Log.d(TAG, "binaryEncodeId: " + readResponse.getBinaryEncodeId().toString());
-                Log.d(TAG, "responseHeader: " + readResponse.getResponseHeader().toString());
-                Log.d(TAG, "typeId: " + readResponse.getTypeId().toString());
+                StringBuilder stringBuilder = new StringBuilder();
 
+                String message1 = ("xmlEncodeId: " + readResponse.getXmlEncodeId().toString());
+                String message2 = ("binaryEncodeId: " + readResponse.getBinaryEncodeId().toString());
+                String message3 = ("responseHeader: " + readResponse.getResponseHeader().toString());
+                String message4 = ("typeId: " + readResponse.getTypeId().toString());
+                stringBuilder.append(message1).append('\n');
+                stringBuilder.append(message2).append('\n');
+                stringBuilder.append(message3).append('\n');
+                stringBuilder.append(message4).append('\n');
+                rx.getConnector().showResult(stringBuilder.toString());
                 DataValue re = readResponse.getResults()[0];
                 for (DataValue dv : readResponse.getResults()) {
                     Log.e(TAG, "next value: " + dv.getValue().toString());

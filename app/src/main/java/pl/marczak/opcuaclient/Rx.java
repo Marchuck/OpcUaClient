@@ -184,11 +184,12 @@ public class Rx {
     }
 
     public Observable<Boolean> writeData(final int data) {
+        Log.w(TAG, "read methods available");
         return Observable.create(new Observable.OnSubscribe<Boolean>() {
             @Override
             public void call(Subscriber<? super Boolean> subscriber) {
-
-                NodeId node = uaClient.getSession().getSessionId();
+               // StringBuilder sb = new StringBuilder();
+                NodeId node = getNode();
                 try {
 
                     List<ReferenceDescription> refdesc = uaClient.getAddressSpace().browseMethods(node);
@@ -207,18 +208,19 @@ public class Rx {
                             Log.d(TAG, "arg out: " + arg.getName());
                         }
                     }
-
                 } catch (Exception x) {
                     Log.e(TAG, "exception:" + x.getMessage());
                     x.printStackTrace();
                 }
-                boolean response = false;
-                subscriber.onNext(response);
+                subscriber.onNext(false);
                 subscriber.onCompleted();
             }
         });
     }
 
+    public static NodeId getNode() {
+        return new NodeId(12162, 0);
+    }
 
     public Observable<CallResponse> callCommand() {
         return Observable.create(new Observable.OnSubscribe<CallResponse>() {
@@ -296,5 +298,14 @@ public class Rx {
                 subscriber.onCompleted();
             }
         });
+    }
+
+    public UiConnector getConnector() {
+        return connector;
+    }
+
+
+    public void yetAnotherCalls(){
+
     }
 }

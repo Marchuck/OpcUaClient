@@ -95,7 +95,7 @@ public class MainActivity extends AppCompatActivity implements UiConnector {
             public void run() {
                 hideProgressBar();
                 status.setTextColor(Color.BLUE);
-                status.setText(dt);
+                content.setText(dt);
                 readButton.setVisibility(View.VISIBLE);
                 writeButton.setVisibility(View.VISIBLE);
                 if (rx.isConnected()) connectButton.setText("disconnect");

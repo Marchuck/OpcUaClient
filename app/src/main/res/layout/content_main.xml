@@ -36,18 +36,26 @@
             android:hint="server name" />
 
     </android.support.design.widget.TextInputLayout>
-    <TextView
-        android:layout_centerHorizontal="true"
-        tools:text="aaaaaaaaa"
+
+    <ScrollView
         android:layout_below="@+id/input_layout"
-        android:id="@+id/content"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_centerHorizontal="true"
+        android:layout_height="200sp">
+
+        <TextView
+            android:id="@+id/content"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="aaaaaaaaa" />
+
+    </ScrollView>
+
     <ProgressBar
-        android:progressDrawable="@color/colorPrimaryDark"
         android:id="@+id/progressBar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
+        android:progressDrawable="@color/colorPrimaryDark"
         android:visibility="gone" />
 </RelativeLayout>
