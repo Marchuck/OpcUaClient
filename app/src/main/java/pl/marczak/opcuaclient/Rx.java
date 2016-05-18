@@ -16,6 +16,7 @@ import org.opcfoundation.ua.builtintypes.DataValue;
 import org.opcfoundation.ua.builtintypes.DateTime;
 import org.opcfoundation.ua.builtintypes.LocalizedText;
 import org.opcfoundation.ua.builtintypes.NodeId;
+import org.opcfoundation.ua.builtintypes.UnsignedInteger;
 import org.opcfoundation.ua.builtintypes.Variant;
 import org.opcfoundation.ua.core.ApplicationDescription;
 import org.opcfoundation.ua.core.ApplicationType;
@@ -59,10 +60,15 @@ public class Rx {
 
     public UaClient uaClient;
 
+    long time0;
+
     public void connect(String url) {
+
+        time0 = System.currentTimeMillis();
         connectToServer(url).flatMap(new Func1<UaClient, Observable<Boolean>>() {
             @Override
             public Observable<Boolean> call(UaClient uaClient) {
+
                 return readDate(uaClient);
             }
         }).flatMap(new Func1<Boolean, Observable<Boolean>>() {
@@ -142,6 +148,7 @@ public class Rx {
                 try {
                     uaClient.connect();
                     Log.w(TAG, "connected to " + uaClient.getServerName());
+                    Log.w(TAG, "time elapsed: " + (System.currentTimeMillis() - time0) + " ms");
                     Log.w(TAG, "session name: " + uaClient.getSessionName());
                     Log.w(TAG, "host name: " + uaClient.getHost());
                     Log.w(TAG, "session node id null?: " + uaClient.getSession().getSessionId().isNullNodeId());
@@ -183,31 +190,56 @@ public class Rx {
         });
     }
 
+    public NodeId getVariableTypesNodeId() {
+        return Identifiers.VariableTypesFolder;
+    }
+
+    static NodeId init(int var0) {
+        return new NodeId(0, UnsignedInteger.getFromBits(var0));
+    }
+
     public Observable<Boolean> writeData(final int data) {
-        Log.w(TAG, "read methods available");
+        Log.w(TAG, "read available nodes");
         return Observable.create(new Observable.OnSubscribe<Boolean>() {
             @Override
             public void call(Subscriber<? super Boolean> subscriber) {
-               // StringBuilder sb = new StringBuilder();
-                NodeId node = getNode();
+                // StringBuilder sb = new StringBuilder();
+                // NodeId node = Identifiers.ObjectsFolder;
+//                NodeId node = getVariableTypesNodeId();
+                long timezero = System.currentTimeMillis();
+                NodeId[] nodes = new NodeId[12000];
+                for (int j = 0; j < 12000; j++) {
+                    nodes[j] = init(j);
+                }
                 try {
+                    for (NodeId node : nodes) {
+                        try {
+                            DataValue dataValue = uaClient.readValue(node);
+                            Log.e(TAG, "next node: value: " + node.getValue() + ",toString: " + node.toString());
+                            Log.e(TAG, "data value: " + dataValue.getValue().toString());
+                            List<ReferenceDescription> refdesc = uaClient.getAddressSpace().browseMethods(node);
+                            if (refdesc.isEmpty()) Log.e(TAG, "empty refdesc list");
+                            for (ReferenceDescription desc : refdesc) {
+                                Log.e(TAG, "reference description: " + desc.getDisplayName().getText());
+                            }
+                            List<UaMethod> methods = uaClient.getAddressSpace().getMethods(node);
+                            if (methods.isEmpty()) Log.e(TAG, "empty methods list");
+                            for (UaMethod m : methods) {
+                                Log.e(TAG, "method: " + m.getDisplayName().getText());
+                                for (Argument arg : m.getInputArguments()) {
+                                    Log.e(TAG, "arg in: " + arg.getName());
+                                }
+                                for (Argument arg : m.getOutputArguments()) {
+                                    Log.e(TAG, "arg out: " + arg.getName());
+                                }
+                            }
+                        } catch (Exception x) {
+                           // Log.e(TAG, "oops! node error: " + x.getMessage());
+                            //x.printStackTrace();
+                        }
 
-                    List<ReferenceDescription> refdesc = uaClient.getAddressSpace().browseMethods(node);
-                    if (refdesc.isEmpty()) Log.e(TAG, "empty refdesc list");
-                    for (ReferenceDescription desc : refdesc) {
-                        Log.d(TAG, "reference description: " + desc.getDisplayName().getText());
                     }
-                    List<UaMethod> methods = uaClient.getAddressSpace().getMethods(node);
-                    if (methods.isEmpty()) Log.e(TAG, "empty methods list");
-                    for (UaMethod m : methods) {
-                        Log.d(TAG, "method: " + m.getDisplayName().getText());
-                        for (Argument arg : m.getInputArguments()) {
-                            Log.d(TAG, "arg in: " + arg.getName());
-                        }
-                        for (Argument arg : m.getOutputArguments()) {
-                            Log.d(TAG, "arg out: " + arg.getName());
-                        }
-                    }
+                    Log.d(TAG, "checking nodes completed in: " + (System.currentTimeMillis() - timezero) + " ms");
                 } catch (Exception x) {
                     Log.e(TAG, "exception:" + x.getMessage());
                     x.printStackTrace();
@@ -305,7 +337,7 @@ public class Rx {
     }
 
 
-    public void yetAnotherCalls(){
+    public void yetAnotherCalls() {
 
     }
 }

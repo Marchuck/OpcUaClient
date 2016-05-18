@@ -57,12 +57,16 @@ public class MainActivity extends AppCompatActivity implements UiConnector {
         return new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Connecting to server...", Snackbar.LENGTH_LONG).show();
                 showProgressBar();
                 final String server = serverEdittext.getText().toString();
-                if (!rx.isConnected())
+                if (!rx.isConnected()){
+                    Snackbar.make(view, "Connecting to server...", Snackbar.LENGTH_LONG).show();
                     rx.connect(server);
-                else rx.disconnect();
+
+                }
+                else{
+                    rx.disconnect();
+                }
             }
         };
     }
