@@ -275,11 +275,14 @@ public class Rx {
                     @Override
                     public void call(Boolean aBoolean) {
                         connector.showResult("Disconnected from server");
+                        connector.onDisconnected();
                     }
                 }, new Action1<Throwable>() {
                     @Override
                     public void call(Throwable throwable) {
-
+                        Log.e(TAG, "Error occurred" + throwable.getMessage());
+                        throwable.printStackTrace();
+                        connector.showError(new Exception(throwable));
                     }
                 });
     }

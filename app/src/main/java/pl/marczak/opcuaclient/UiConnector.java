@@ -8,6 +8,7 @@ public interface UiConnector {
     void showError(Exception ex);
 
     void onConnected();
+    void onDisconnected();
 
     void showResult(String message);
 }

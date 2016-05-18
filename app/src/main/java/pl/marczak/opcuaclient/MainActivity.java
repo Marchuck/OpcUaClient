@@ -1,10 +1,7 @@
 package pl.marczak.opcuaclient;
 
-import android.content.res.ColorStateList;
 import android.graphics.Color;
-import android.os.Build;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
@@ -16,17 +13,15 @@ import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import org.opcfoundation.ua.builtintypes.DateTime;
-
 public class MainActivity extends AppCompatActivity implements UiConnector {
 
     public static final String TAG = MainActivity.class.getSimpleName();
     public static final String name = MainActivity.class.getPackage().getName();
-    Button fab, fab1, fab3;
+    Button connectButton, readButton, writeButton;
     ProgressBar progressBar;
     TextInputLayout serverLayout;
     TextInputEditText serverEdittext;
-    TextView status;
+    TextView status, content;
     Rx rx;
 
     @Override
@@ -34,44 +29,28 @@ public class MainActivity extends AppCompatActivity implements UiConnector {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         injectViews();
-//        prepareFab(Color.BLACK, fab3);
-//        prepareFab(Color.BLUE, fab1);
-        fab.setOnClickListener(getUaListener());
-        fab1.setOnClickListener(new ReadListener(rx));
-        fab3.setOnClickListener(new WriteListener(rx));
-    }
-
-    private void prepareFab(int Color, FloatingActionButton fab3) {
-        fab3.setRippleColor(Color);
-        fab3.setBackgroundColor(Color);
-        fab3.setBackgroundTintList(ColorStateList.valueOf(Color));
+        rx = new Rx(this);
+        connectButton.setOnClickListener(getUaListener());
+        readButton.setOnClickListener(new ReadListener(rx));
+        writeButton.setOnClickListener(new WriteListener(rx));
     }
 
     private void injectViews() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
-
-        //int colorAccent = getResources().getColor(R.color.colorAccent);
-
-//        if (Build.VERSION.SDK_INT >= 21)
-//            progressBar.setProgressTintList(ColorStateList.valueOf(colorAccent));
-//        else
-//            progressBar.getProgressDrawable().setColorFilter(colorAccent, android.graphics.PorterDuff.Mode.SRC_IN);
-
         status = (TextView) findViewById(R.id.status);
-        fab = (Button) findViewById(R.id.fab);
-        fab1 = (Button) findViewById(R.id.fab1);
-        fab3 = (Button) findViewById(R.id.fab3);
-
-        fab1.setVisibility(View.GONE);
-        fab3.setVisibility(View.GONE);
+        content = (TextView) findViewById(R.id.content);
+        connectButton = (Button) findViewById(R.id.fab);
+        readButton = (Button) findViewById(R.id.fab1);
+        writeButton = (Button) findViewById(R.id.fab3);
+        readButton.setVisibility(View.GONE);
+        writeButton.setVisibility(View.GONE);
 
         serverLayout = (TextInputLayout) findViewById(R.id.input_layout);
         serverEdittext = (TextInputEditText) findViewById(R.id.input_server_name);
         if (serverEdittext == null) throw new NullPointerException("Nullable view");
         serverEdittext.setText("opc.tcp://192.168.0.15:9099/Matlab");
-        rx = new Rx(this);
     }
 
     private View.OnClickListener getUaListener() {
@@ -117,10 +96,10 @@ public class MainActivity extends AppCompatActivity implements UiConnector {
                 hideProgressBar();
                 status.setTextColor(Color.BLUE);
                 status.setText(dt);
-                fab1.setVisibility(View.VISIBLE);
-                fab3.setVisibility(View.VISIBLE);
-                if (rx.isConnected()) fab.setText("disconnect");
-                else fab.setText("connect");
+                readButton.setVisibility(View.VISIBLE);
+                writeButton.setVisibility(View.VISIBLE);
+                if (rx.isConnected()) connectButton.setText("disconnect");
+                else connectButton.setText("connect");
             }
         });
     }
@@ -130,11 +109,23 @@ public class MainActivity extends AppCompatActivity implements UiConnector {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                status.setAlpha(0f);
-                status.setText("Connected"); fab.setText("disconnect");
-                fab1.setVisibility(View.VISIBLE);
-                fab3.setVisibility(View.VISIBLE);
+                status.setText("Connected");
+                connectButton.setText("disconnect");
+                readButton.setVisibility(View.VISIBLE);
+                writeButton.setVisibility(View.VISIBLE);
+            }
+        });
+    }
 
+    @Override
+    public void onDisconnected() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                status.setText("Disconnected");
+                connectButton.setText("connect");
+                readButton.setVisibility(View.GONE);
+                writeButton.setVisibility(View.GONE);
             }
         });
     }
