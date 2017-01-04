@@ -1,5 +1,6 @@
 package pl.marczak.opcuaclient;
 
+import android.Manifest;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
@@ -13,11 +14,18 @@ import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.tbruyelle.rxpermissions.RxPermissions;
+
+import rx.Observable;
+import rx.functions.Action1;
+import rx.functions.Func1;
+
 public class MainActivity extends AppCompatActivity implements UiConnector {
 
     public static final String TAG = MainActivity.class.getSimpleName();
     public static final String name = MainActivity.class.getPackage().getName();
-    Button connectButton, readButton, writeButton;
+    ConnectButton connectButton;
+    Button readButton, writeButton;
     ProgressBar progressBar;
     TextInputLayout serverLayout;
     TextInputEditText serverEdittext;
@@ -30,9 +38,25 @@ public class MainActivity extends AppCompatActivity implements UiConnector {
         setContentView(R.layout.activity_main);
         injectViews();
         rx = new Rx(this);
-        connectButton.setOnClickListener(getUaListener());
+
+        connectButton.onClickedAction(getUaListener());
+        connectButton.setBoundView(progressBar);
         readButton.setOnClickListener(new ReadListener(rx));
         writeButton.setOnClickListener(new WriteListener(rx));
+        final RxPermissions rxPermissions = new RxPermissions(this);
+        rxPermissions.request(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE)
+                .subscribe(new Action1<Boolean>() {
+                    @Override
+                    public void call(Boolean granted) {
+                        Log.d(TAG, "onNext: " + granted);
+                        if (!granted) finish();
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        Log.e(TAG, "error: ", throwable);
+                    }
+                });
     }
 
     private void injectViews() {
@@ -41,7 +65,7 @@ public class MainActivity extends AppCompatActivity implements UiConnector {
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
         status = (TextView) findViewById(R.id.status);
         content = (TextView) findViewById(R.id.content);
-        connectButton = (Button) findViewById(R.id.fab);
+        connectButton = (ConnectButton) findViewById(R.id.fab);
         readButton = (Button) findViewById(R.id.fab1);
         writeButton = (Button) findViewById(R.id.fab3);
         readButton.setVisibility(View.GONE);
@@ -49,15 +73,13 @@ public class MainActivity extends AppCompatActivity implements UiConnector {
 
         serverLayout = (TextInputLayout) findViewById(R.id.input_layout);
         serverEdittext = (TextInputEditText) findViewById(R.id.input_server_name);
-        if (serverEdittext == null) throw new NullPointerException("Nullable view");
-        serverEdittext.setText("opc.tcp://192.168.0.15:9099/Matlab");
+        serverEdittext.setText("opc.tcp://192.168.0.185:12686/example");
     }
 
     View.OnClickListener getUaListener() {
         return new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                showProgressBar();
                 final String server = serverEdittext.getText().toString();
                 if (!rx.isConnected()) {
                     Snackbar.make(view, "Connecting to server...", Snackbar.LENGTH_LONG).show();

@@ -102,8 +102,8 @@ public class Rx {
                 } catch (URISyntaxException syntaxException) {
                     connector.showError(syntaxException);
                     Log.e(TAG, "connectInThread: failed: " + syntaxException.getMessage());
-                    subscriber.onError(syntaxException);
-                    return;
+//                    subscriber.onError(syntaxException);
+//                    return;
                 }
                 // Create and set certificate validator
                 PkiFileBasedCertificateValidator validator = new PkiFileBasedCertificateValidator("/sdcard/PKI/CA");
